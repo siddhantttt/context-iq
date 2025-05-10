@@ -1,128 +1,122 @@
-# Quick-RAG
+# Tiny RAG
 
-A minimal Retrieval-Augmented Generation (RAG) API built with FastAPI, OpenAI, and FAISS, structured as a monorepo.
+A simple Retrieval-Augmented Generation (RAG) system for querying your documents using AI.
+
+## Overview
+
+Tiny RAG is a lightweight RAG system that allows you to:
+
+1. Upload documents (PDF, DOCX, TXT)
+2. Index their content for semantic search
+3. Ask questions about your documents
+4. Get AI-generated answers with relevant source citations
+
+The system consists of two main components:
+
+- **Backend**: A FastAPI application that handles document processing, vector indexing, and AI-powered question answering
+- **Frontend**: A web interface for chatting with your documents and managing document uploads
 
 ## Project Structure
 
 ```
-quick-rag/
-├── backend/            # FastAPI application and RAG logic
-│   ├── app.py
-│   ├── embeddings.py
-│   ├── extract.py
-│   ├── index.py
-│   ├── models.py
-│   └── requirements.txt
-├── frontend/           # Placeholder for a future frontend application
-├── .gitignore
-├── README.md
-├── quick_rag.db        # SQLite database (generated at root)
-└── .faiss.*            # FAISS index files (generated at root)
+tiny-rag/
+├── backend/                # Backend API and processing logic
+│   ├── app.py              # FastAPI application
+│   ├── models.py           # Database models
+│   ├── embeddings.py       # Text embedding utilities
+│   ├── extract.py          # Document text extraction
+│   ├── index.py            # Vector indexing and retrieval
+│   └── requirements.txt    # Python dependencies
+├── frontend/               # Frontend web interface
+│   ├── index.html          # Chat interface
+│   ├── documents.html      # Document management interface
+│   ├── style.css           # CSS styling
+│   ├── script.js           # JavaScript functionality
+│   └── README.md           # Frontend setup instructions
+└── README.md               # This file
 ```
 
-## Features
+## Quick Start
 
-- Upload documents (PDF, DOCX, TXT)
-- Automatic text extraction and chunking
-- Vector search using FAISS
-- Question answering using OpenAI's GPT models
-- REST API with FastAPI
+### 1. Set Up the Backend
 
-## Setup
+```bash
+# Navigate to backend directory
+cd backend
 
-1. **Navigate to the backend directory and create a virtual environment**
+# Create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-   From the project root:
-   ```bash
-   cd backend
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   cd .. # Go back to project root for next steps if needed, or stay in backend/
-   ```
+# Install dependencies
+pip install -r requirements.txt
 
-2. **Install dependencies**
+# Start the server
+python app.py
+```
 
-   Ensure your virtual environment is activated. From the project root:
-   ```bash
-   pip install -r backend/requirements.txt
-   ```
-   Or if you are inside the `backend` directory:
-   ```bash
-   pip install -r requirements.txt
-   ```
+The backend will be running at http://localhost:8000.
 
-3. **Set environment variables**
+### 2. Set Up the Frontend
 
-   These should be set in the environment from which you run the backend server (e.g., your shell in the project root).
-   ```bash
-   export OPENAI_API_KEY=your_openai_api_key
-   # Optional:
-   # export OPENAI_MODEL=gpt-4o-mini  # or gpt-3.5-turbo
-   # export CHUNK_SIZE_TOKENS=500
-   # export FAISS_INDEX_PATH=.faiss # Default, creates .faiss.index and .faiss.map at root
-   ```
+The frontend is a static web application that can be served in various ways:
 
-## Running the API
+**Option 1**: Open `frontend/index.html` directly in your browser
 
-   From the project root, with the virtual environment (created in `backend/.venv`) activated:
-   ```bash
-   uvicorn backend.app:app --reload
-   ```
+**Option 2**: Use Python's built-in HTTP server
+```bash
+# From the project root directory
+python -m http.server
+# Then visit http://localhost:8000/frontend/
+```
 
-   The API will be available at `http://localhost:8000`.
+**Option 3**: Use VS Code's Live Server extension or any other static file server
 
-   API documentation is available at `http://localhost:8000/docs`.
+For detailed frontend setup instructions, see [frontend/README.md](frontend/README.md).
+
+## Using the Application
+
+### Document Management
+
+1. Navigate to the "Manage Documents" tab
+2. Upload documents using the file upload form
+3. View your uploaded documents 
+4. Click "View Details" to see document chunks
+
+### Chat Interface
+
+1. Navigate to the "Chat" tab
+2. Type your question in the input field
+3. Press "Send" or hit Enter
+4. The system will retrieve relevant information from your documents and provide an answer
+5. Sources used for generating the answer will be displayed below the response
 
 ## API Endpoints
 
+The backend provides the following API endpoints:
+
 - `POST /documents` - Upload a document
 - `GET /documents` - List all documents
-- `GET /documents/{doc_id}` - Get document details and chunks
-- `POST /query` - Ask a question about the documents
+- `GET /documents/{doc_id}` - Get details of a specific document
+- `POST /query` - Ask a question about your documents
 
-## Example Usage
+## Technologies Used
 
-   (Ensure the server is running as described above)
+- **Backend**:
+  - FastAPI (Python web framework)
+  - FAISS (Vector search library)
+  - SQLModel (Database ORM)
+  - OpenAI API (For embeddings and text generation)
+  - Various document processing libraries (PyPDF, docx2txt)
 
-### Upload a document
+- **Frontend**:
+  - HTML/CSS/JavaScript
+  - Fetch API for backend communication
 
-   ```bash
-   curl -X POST "http://localhost:8000/documents" \
-     -H "accept: application/json" \
-     -H "Content-Type: multipart/form-data" \
-     -F "file=@path/to/your/document.pdf"
-   ```
+## License
 
-### Query documents
+[Add your license information here]
 
-   ```bash
-   curl -X POST "http://localhost:8000/query" \
-     -H "accept: application/json" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "question": "What is the main topic of the document?",
-       "doc_ids": [1, 2]  # Optional, limit to specific documents
-     }'
-   ```
+## Acknowledgements
 
-## Architecture
-
-- **FastAPI**: Web framework for the REST API
-- **OpenAI API**: For embeddings and LLM inference
-- **FAISS**: Vector database for similarity search
-- **SQLite + SQLModel**: Document and chunk metadata storage (database file at project root)
-
-## System Flow
-
-1. **Document Processing**: 
-   - Extract text from uploaded documents
-   - Split text into chunks of ~500 tokens
-   - Generate embeddings for each chunk
-   - Store in FAISS (index files at project root) and SQLite (DB file at project root)
-
-2. **Query Processing**:
-   - Embed the query
-   - Find top-k relevant chunks
-   - Compose prompt with context and question
-   - Generate answer with LLM
-   - Return answer and sources 
+[Add any acknowledgements or credits here] 

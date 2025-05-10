@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiny RAG UI</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Inline styles removed and moved to style.css */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tiny RAG UI</h1>
+        <div class="tab-navigation">
+            <a href="index.html" class="active">Chat</a>
+            <a href="documents.html">Manage Documents</a>
+        </div>
+        <div class="chat-box">
+            <div id="response-area" aria-live="polite">
+                <!-- Responses will appear here -->
+            </div>
+            <div class="input-area">
+                <input type="text" id="user-query" placeholder="Ask your question...">
+                <button id="submit-query">Send</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 

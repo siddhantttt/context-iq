@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Management - Tiny RAG</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Additional styles for document management */
+        .doc-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .upload-section {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .document-list {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .document-card {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .doc-info {
+            flex-grow: 1; /* Allow this to take up available space */
+            overflow: hidden; /* Prevent content from spilling out */
+            margin-right: 10px; /* Add some space between name and button */
+        }
+
+        .doc-info strong {
+            display: block; /* Ensure it behaves like a block for overflow */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .document-card:hover {
+            background-color: #f8f9fa;
+        }
+
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+
+        .upload-btn {
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s ease;
+        }
+
+        .upload-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .view-btn {
+            padding: 8px 12px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .view-btn:hover {
+            background-color: #5a6268;
+        }
+
+        .status-message {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .document-details {
+            display: none;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            margin-top: 5px;
+        }
+
+        .chunk-item {
+            padding: 8px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+
+        .chunk-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Document Management</h1>
+        <div class="tab-navigation">
+            <a href="index.html">Chat</a>
+            <a href="documents.html" class="active">Manage Documents</a>
+        </div>
+        
+        <div class="doc-container">
+            <div class="upload-section">
+                <h2>Upload Document</h2>
+                <div id="status-message" class="status-message"></div>
+                <form id="upload-form" class="upload-form">
+                    <input type="file" id="document-file" accept=".pdf,.docx,.txt" required>
+                    <button type="submit" class="upload-btn">Upload Document</button>
+                </form>
+            </div>
+            
+            <div class="document-list">
+                <h2>Your Documents</h2>
+                <div id="documents-container">
+                    <!-- Documents will be listed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadForm = document.getElementById('upload-form');
+            const documentsContainer = document.getElementById('documents-container');
+            const statusMessage = document.getElementById('status-message');
+            const backendUrl = 'http://localhost:8000';
+            
+            // Load documents on page load
+            loadDocuments();
+            
+            // Handle document upload
+            uploadForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const fileInput = document.getElementById('document-file');
+                const file = fileInput.files[0];
+                
+                if (!file) {
+                    showStatusMessage('Please select a file to upload', 'error');
+                    return;
+                }
+                
+                // Create form data
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                try {
+                    showStatusMessage('Uploading document...', 'info');
+                    
+                    const response = await fetch(`${backendUrl}/documents`, {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ detail: 'Unknown error occurred' }));
+                        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.detail}`);
+                    }
+                    
+                    const data = await response.json();
+                    showStatusMessage(`Document "${data.name}" uploaded successfully!`, 'success');
+                    fileInput.value = '';
+                    
+                    // Reload the document list
+                    loadDocuments();
+                    
+                } catch (error) {
+                    console.error('Error uploading document:', error);
+                    showStatusMessage(`Error: ${error.message || 'Could not upload document'}`, 'error');
+                }
+            });
+            
+            // Function to load documents
+            async function loadDocuments() {
+                try {
+                    const response = await fetch(`${backendUrl}/documents`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const documents = await response.json();
+                    
+                    if (documents.length === 0) {
+                        documentsContainer.innerHTML = '<p>No documents found. Upload some documents to get started!</p>';
+                        return;
+                    }
+                    
+                    // Clear existing documents
+                    documentsContainer.innerHTML = '';
+                    
+                    // Add each document
+                    documents.forEach(doc => {
+                        const docElement = document.createElement('div');
+                        docElement.className = 'document-card';
+                        docElement.id = `doc-${doc.id}`;
+                        
+                        docElement.innerHTML = `
+                            <div class="doc-info">
+                                <strong>${doc.name}</strong>
+                            </div>
+                            <button class="view-btn" data-id="${doc.id}">View Details</button>
+                        `;
+                        
+                        // Create element for details (initially hidden)
+                        const detailsElement = document.createElement('div');
+                        detailsElement.className = 'document-details';
+                        detailsElement.id = `details-${doc.id}`;
+                        detailsElement.innerHTML = '<p>Loading details...</p>';
+                        
+                        documentsContainer.appendChild(docElement);
+                        documentsContainer.appendChild(detailsElement);
+                        
+                        // Add click event to view button
+                        const viewBtn = docElement.querySelector('.view-btn');
+                        viewBtn.addEventListener('click', () => {
+                            toggleDocumentDetails(doc.id);
+                        });
+                    });
+                    
+                } catch (error) {
+                    console.error('Error loading documents:', error);
+                    documentsContainer.innerHTML = `<p>Error loading documents: ${error.message}</p>`;
+                }
+            }
+            
+            // Function to toggle document details
+            async function toggleDocumentDetails(docId) {
+                const detailsElement = document.getElementById(`details-${docId}`);
+                
+                if (detailsElement.style.display === 'block') {
+                    detailsElement.style.display = 'none';
+                    return;
+                }
+                
+                detailsElement.style.display = 'block';
+                
+                // Only fetch details if we haven't loaded them yet
+                if (detailsElement.innerHTML === '<p>Loading details...</p>') {
+                    try {
+                        const response = await fetch(`${backendUrl}/documents/${docId}`);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
+                        const docDetails = await response.json();
+                        
+                        let chunksHtml = '';
+                        if (docDetails.chunks && docDetails.chunks.length > 0) {
+                            chunksHtml = '<h4>Chunks:</h4><div class="chunks-list">';
+                            docDetails.chunks.forEach((chunk, index) => {
+                                // Only show first 100 characters of each chunk to avoid overwhelming the UI
+                                const previewText = chunk.text.length > 100 
+                                    ? chunk.text.substring(0, 100) + '...' 
+                                    : chunk.text;
+                                chunksHtml += `<div class="chunk-item">Chunk ${index + 1}: ${previewText}</div>`;
+                            });
+                            chunksHtml += '</div>';
+                        } else {
+                            chunksHtml = '<p>No chunks available for this document.</p>';
+                        }
+                        
+                        detailsElement.innerHTML = `
+                            <div>
+                                <p><strong>ID:</strong> ${docDetails.id}</p>
+                                <p><strong>Name:</strong> ${docDetails.name}</p>
+                                <p><strong>Type:</strong> ${docDetails.mime_type}</p>
+                                ${chunksHtml}
+                            </div>
+                        `;
+                        
+                    } catch (error) {
+                        console.error('Error loading document details:', error);
+                        detailsElement.innerHTML = `<p>Error loading details: ${error.message}</p>`;
+                    }
+                }
+            }
+            
+            // Function to show status messages
+            function showStatusMessage(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = 'status-message';
+                statusMessage.classList.add(type);
+                statusMessage.style.display = 'block';
+                
+                // Auto-hide success messages after 5 seconds
+                if (type === 'success') {
+                    setTimeout(() => {
+                        statusMessage.style.display = 'none';
+                    }, 5000);
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

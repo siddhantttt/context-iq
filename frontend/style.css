@@ -1,0 +1,213 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #e9e9e9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    width: 100%;
+    max-width: 650px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 85vh;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    padding: 22px;
+    margin: 0;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #d6d9dc;
+    font-weight: 600;
+}
+
+.chat-box {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #ffffff;
+}
+
+#response-area {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.user-message, .bot-message {
+    padding: 10px 15px;
+    border-radius: 18px;
+    max-width: 70%;
+    word-wrap: break-word;
+    line-height: 1.4;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+.user-message {
+    background-color: #007bff;
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 6px;
+}
+
+.bot-message {
+    background-color: #f1f0f0;
+    color: #2c3e50;
+    align-self: flex-start;
+    border-bottom-left-radius: 6px;
+}
+
+.input-area {
+    display: flex;
+    padding-top: 10px;
+    border-top: 1px solid #d6d9dc;
+}
+
+#user-query {
+    flex-grow: 1;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 20px;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+#user-query:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.2);
+}
+
+#submit-query {
+    padding: 12px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+#submit-query:hover {
+    background-color: #0056b3;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Scrollbar styling */
+#response-area::-webkit-scrollbar {
+    width: 8px;
+}
+
+#response-area::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+#response-area::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+#response-area::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Tab Navigation Styles */
+.tab-navigation {
+    display: flex;
+    background-color: #f8f9fa; /* Same as header for cohesion */
+    border-bottom: 1px solid #d6d9dc; /* Match header border */
+    padding: 0 10px; /* Add some padding */
+}
+
+.tab-navigation a {
+    padding: 12px 18px;
+    text-decoration: none;
+    color: #007bff;
+    font-size: 16px;
+    font-weight: 500;
+    border-bottom: 3px solid transparent; /* For active state indication */
+    margin-bottom: -1px; /* Align border with container's border */
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.tab-navigation a:hover {
+    color: #0056b3;
+    background-color: #e9ecef; /* Slight hover background for tabs */
+}
+
+.tab-navigation a.active {
+    color: #0056b3; /* Darker color for active tab */
+    border-bottom-color: #007bff; /* Highlight active tab */
+    font-weight: 600;
+}
+
+/* Source List Styling in Bot Message */
+.bot-message .sources-list {
+    list-style-type: disc;
+    padding-left: 20px; /* Indent the list */
+    margin-top: 5px; /* Space between "Sources:" title and the list */
+    font-size: 0.9em; /* Slightly smaller font for sources */
+    color: #555; /* Slightly muted color for source text */
+}
+
+.bot-message .sources-list li {
+    margin-bottom: 4px; /* Space between source items */
+}
+
+.bot-message .source-meta {
+    /* Styles for the line with File: ... (Chunk ID: ...) */
+    /* (Currently no specific styles needed beyond what li provides, but class is there for future) */
+}
+
+.bot-message .source-chunk-preview {
+    font-size: 0.9em; /* Keep it slightly smaller or same as list item */
+    color: #444; /* Slightly darker than list text for emphasis if needed, or keep as #555 */
+    background-color: #f0f0f0; /* Very light grey background */
+    border-left: 3px solid #007bff; /* Accent border, matches user message/theme color */
+    padding: 8px 10px;
+    margin-top: 5px; /* Space between meta and chunk preview */
+    border-radius: 4px;
+    white-space: pre-wrap; /* Preserve whitespace and newlines in the chunk text */
+    word-wrap: break-word; /* Ensure long words break */
+}
+
+/* REMOVE Old Navigation Link Styles */
+/* 
+.nav-links {
+    display: flex;
+    justify-content: center;
+    padding: 15px 0; 
+    background-color: #f8f9fa; 
+    border-top: 1px solid #d6d9dc; 
+}
+
+.nav-links a {
+    color: #007bff;
+    text-decoration: none;
+    margin: 0 10px;
+    font-size: 14px; 
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+*/ 
