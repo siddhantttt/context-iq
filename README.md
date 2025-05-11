@@ -1,4 +1,4 @@
-# Tiny RAG
+# Context IQ
 
 A simple Retrieval-Augmented Generation (RAG) system for querying your documents using AI.
 
